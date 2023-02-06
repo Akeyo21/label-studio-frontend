@@ -9,7 +9,7 @@ const { Paragraph } = Typography;
 
 export class HtxTextBox extends React.Component {
   state = {
-    editing: false,
+    editing: true,
     height: 0,
     value: this.props.text,
   };
@@ -31,6 +31,21 @@ export class HtxTextBox extends React.Component {
     if (isFF(FF_DEV_1566)) {
       window.addEventListener('click', this.handleGlobalClick, { capture: true });
     }
+
+    if (this.state.editing) {
+      this.startEditing();
+    }
+
+    window.addEventListener(
+      'click',
+      () => {
+        if (this.state.editing) {
+          this.startEditing();
+          this.inputRef.current?.focus();
+        }
+      },
+      { capture: true },
+    );
   }
 
   componentWillUnmount() {
@@ -39,10 +54,11 @@ export class HtxTextBox extends React.Component {
     }
   }
 
-  handleGlobalClick = (e) => {
+  handleGlobalClick = e => {
     const el = e?.target;
     const isShortcut = el?.dataset?.shortcut;
-    const shouldSkip = !this.state.editing || this.props.ignoreShortcuts && isShortcut || el === this.inputRef.current;
+    const shouldSkip =
+      !this.state.editing || (this.props.ignoreShortcuts && isShortcut) || el === this.inputRef.current;
 
     if (!shouldSkip) {
       this.setEditing(false);
@@ -94,7 +110,7 @@ export class HtxTextBox extends React.Component {
   }, 100);
 
   renderEdit() {
-    const { className = '', rows = 1, onlyEdit, name, onFocus, onChange, ...props } = this.props;
+    const { className = '', rows = 1, onlyEdit, name, onFocus, ...props } = this.props;
     const { height, value } = this.state;
 
     const inputProps = {
@@ -104,9 +120,9 @@ export class HtxTextBox extends React.Component {
       autoFocus: true,
       ref: this.inputRef,
       value,
-      onBlur: isFF(FF_DEV_1566) ? ()=>{
-        onChange(this.state.value);
-      } : this.save,
+      onBlur: () => {
+        this.props.onChange(this.state.value);
+      },
       onFocus,
       onChange: e => {
         this.setValue(e.target.value);
