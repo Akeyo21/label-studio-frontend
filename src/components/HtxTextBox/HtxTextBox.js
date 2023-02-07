@@ -37,31 +37,36 @@ export class HtxTextBox extends React.Component {
     window.removeEventListener('click', this.handleGlobalClick, { capture: true });
   }
 
+  clickedElement = (clickedElement, targetElement) => {
+    return clickedElement && (clickedElement === targetElement || clickedElement.contains(targetElement));
+  };
+
   handleGlobalClick = e => {
     const elementTarget = e?.target;
     const playPauseButton = document.getElementById('play-pause');
-    const clickedPlayPauseButton =
-      playPauseButton && (elementTarget === playPauseButton || playPauseButton.contains(elementTarget));
+    const waveFormElement = document.getElementById('wave');
+    const clickedPlayPauseButton = this.clickedElement(playPauseButton, elementTarget);
+    const clickedWaveFormElement = this.clickedElement(waveFormElement, elementTarget);
 
-    if (clickedPlayPauseButton) {
+    if (clickedPlayPauseButton || clickedWaveFormElement) {
       this.focusTextArea();
       return;
     }
 
-    const isShortcut = elementTarget?.dataset?.shortcut;
-    const shouldSkip =
-      !this.state.editing || (this.props.ignoreShortcuts && isShortcut) || elementTarget === this.inputRef.current;
+    if (isFF(FF_DEV_1566)) {
+      const isShortcut = elementTarget?.dataset?.shortcut;
+      const shouldSkip =
+        !this.state.editing || (this.props.ignoreShortcuts && isShortcut) || elementTarget === this.inputRef.current;
 
-    if (!shouldSkip) {
-      this.setEditing(false);
+      if (!shouldSkip) {
+        this.setEditing(false);
+      }
     }
   };
 
   focusTextArea = () => {
-    if (this.state.editing) {
-      this.focus();
-      this.inputRef.current?.focus();
-    }
+    this.focus();
+    this.inputRef.current?.focus();
   };
 
   startEditing = () => {
