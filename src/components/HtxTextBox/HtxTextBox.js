@@ -9,7 +9,7 @@ const { Paragraph } = Typography;
 
 export class HtxTextBox extends React.Component {
   state = {
-    editing: false,
+    editing: true,
     height: 0,
     value: this.props.text,
   };
@@ -28,25 +28,45 @@ export class HtxTextBox extends React.Component {
   }
 
   componentDidMount() {
-    if (isFF(FF_DEV_1566)) {
-      window.addEventListener('click', this.handleGlobalClick, { capture: true });
-    }
+    this.focus();
+
+    window.addEventListener('click', this.handleGlobalClick, { capture: true });
   }
 
   componentWillUnmount() {
-    if (isFF(FF_DEV_1566)) {
-      window.removeEventListener('click', this.handleGlobalClick, { capture: true });
-    }
+    window.removeEventListener('click', this.handleGlobalClick, { capture: true });
   }
 
-  handleGlobalClick = (e) => {
-    const el = e?.target;
-    const isShortcut = el?.dataset?.shortcut;
-    const shouldSkip = !this.state.editing || this.props.ignoreShortcuts && isShortcut || el === this.inputRef.current;
+  clickedElement = (clickedElement, targetElement) => {
+    return clickedElement && (clickedElement === targetElement || clickedElement.contains(targetElement));
+  };
 
-    if (!shouldSkip) {
-      this.setEditing(false);
+  handleGlobalClick = e => {
+    const elementTarget = e?.target;
+    const playPauseButton = document.getElementById('play-pause');
+    const waveFormElement = document.getElementById('wave');
+    const clickedPlayPauseButton = this.clickedElement(playPauseButton, elementTarget);
+    const clickedWaveFormElement = this.clickedElement(waveFormElement, elementTarget);
+
+    if (clickedPlayPauseButton || clickedWaveFormElement) {
+      this.focusTextArea();
+      return;
     }
+
+    if (isFF(FF_DEV_1566)) {
+      const isShortcut = elementTarget?.dataset?.shortcut;
+      const shouldSkip =
+        !this.state.editing || (this.props.ignoreShortcuts && isShortcut) || elementTarget === this.inputRef.current;
+
+      if (!shouldSkip) {
+        this.setEditing(false);
+      }
+    }
+  };
+
+  focusTextArea = () => {
+    this.startEditing();
+    this.inputRef.current?.focus();
   };
 
   startEditing = () => {
@@ -94,7 +114,7 @@ export class HtxTextBox extends React.Component {
   }, 100);
 
   renderEdit() {
-    const { className = '', rows = 1, onlyEdit, name, onFocus, onChange, ...props } = this.props;
+    const { className = '', rows = 1, onlyEdit, name, onFocus, ...props } = this.props;
     const { height, value } = this.state;
 
     const inputProps = {
@@ -104,9 +124,9 @@ export class HtxTextBox extends React.Component {
       autoFocus: true,
       ref: this.inputRef,
       value,
-      onBlur: isFF(FF_DEV_1566) ? ()=>{
-        onChange(this.state.value);
-      } : this.save,
+      onBlur: () => {
+        this.props.onChange(this.state.value);
+      },
       onFocus,
       onChange: e => {
         this.setValue(e.target.value);
