@@ -40,7 +40,8 @@ export class HtxTextBox extends React.Component {
   handleGlobalClick = e => {
     const elementTarget = e?.target;
     const playPauseButton = document.getElementById('play-pause');
-    const clickedPlayPauseButton = elementTarget === playPauseButton || playPauseButton.contains(elementTarget);
+    const clickedPlayPauseButton =
+      playPauseButton && (elementTarget === playPauseButton || playPauseButton.contains(elementTarget));
 
     if (clickedPlayPauseButton) {
       this.focusTextArea();
