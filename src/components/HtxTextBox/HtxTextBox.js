@@ -65,7 +65,7 @@ export class HtxTextBox extends React.Component {
   };
 
   focusTextArea = () => {
-    this.focus();
+    this.startEditing();
     this.inputRef.current?.focus();
   };
 
