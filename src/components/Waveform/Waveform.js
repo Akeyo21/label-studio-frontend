@@ -174,11 +174,13 @@ export default class Waveform extends React.Component {
   };
 
   onChangeZoomY = value => {
-
-    this.setState({
-      ...this.state,
-      zoomY: value,
-    }, this.updateZoomY);
+    this.setState(
+      {
+        ...this.state,
+        zoomY: value,
+      },
+      this.updateZoomY,
+    );
   };
 
   updateZoomY = throttle(() => {
@@ -376,11 +378,13 @@ export default class Waveform extends React.Component {
 
     const self = this;
 
+    console.log('PROPS', this.props);
     if (this.props.regions) {
       /**
        * Mouse enter on region
        */
       this.wavesurfer.on('region-mouseenter', reg => {
+        console.log('REGION', reg._region);
         reg._region?.onMouseOver();
       });
 
@@ -394,7 +398,7 @@ export default class Waveform extends React.Component {
       /**
        * Add region to wave
        */
-      this.wavesurfer.on('region-created', (reg) => {
+      this.wavesurfer.on('region-created', reg => {
         const history = self.props.item.annotation.history;
 
         // if user draw new region the final state will be in `onUpdateEnd`
@@ -410,16 +414,21 @@ export default class Waveform extends React.Component {
         reg.color = region.selectedregionbg;
 
         // If the region channel is not set, set it to the audio region channel
-        if (reg.channelIdx === -1)
-          reg.channelIdx = region.channel;
+        if (reg.channelIdx === -1) reg.channelIdx = region.channel;
 
-        reg.on('click', (ev) => region.onClick(self.wavesurfer, ev));
+        reg.on('click', ev => {
+          region.onClick(self.wavesurfer, ev);
+        });
         reg.on('update-end', () => region.onUpdateEnd(self.wavesurfer));
 
         reg.on('dblclick', () => {
           window.setTimeout(function() {
             reg.play();
           }, 0);
+        });
+
+        reg.on('in', ev => {
+          region.onClick(self.wavesurfer, ev);
         });
 
         reg.on('out', () => {});
@@ -523,7 +532,7 @@ export default class Waveform extends React.Component {
                 <div style={{ width: '100%' }}>
                   <Slider
                     min={MIN_ZOOM_Y}
-                    step={.1}
+                    step={0.1}
                     max={MAX_ZOOM_Y}
                     value={typeof this.state.zoomY === 'number' ? this.state.zoomY : MIN_ZOOM_Y}
                     onChange={value => {
