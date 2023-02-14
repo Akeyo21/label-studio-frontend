@@ -413,8 +413,9 @@ export default class Waveform extends React.Component {
         // If the region channel is not set, set it to the audio region channel
         if (reg.channelIdx === -1) reg.channelIdx = region.channel;
 
-        reg.on('click', () => {
+        reg.on('click', ev => {
           reg.play();
+          region.onClick(self.wavesurfer, ev);
         });
         reg.on('update-end', () => region.onUpdateEnd(self.wavesurfer));
 
