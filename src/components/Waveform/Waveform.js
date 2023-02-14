@@ -378,13 +378,11 @@ export default class Waveform extends React.Component {
 
     const self = this;
 
-    console.log('PROPS', this.props);
     if (this.props.regions) {
       /**
        * Mouse enter on region
        */
       this.wavesurfer.on('region-mouseenter', reg => {
-        console.log('REGION', reg._region);
         reg._region?.onMouseOver();
       });
 
@@ -394,7 +392,6 @@ export default class Waveform extends React.Component {
       this.wavesurfer.on('region-mouseleave', reg => {
         reg._region?.onMouseLeave();
       });
-
       /**
        * Add region to wave
        */
@@ -416,16 +413,10 @@ export default class Waveform extends React.Component {
         // If the region channel is not set, set it to the audio region channel
         if (reg.channelIdx === -1) reg.channelIdx = region.channel;
 
-        reg.on('click', ev => {
-          region.onClick(self.wavesurfer, ev);
+        reg.on('click', () => {
+          reg.play();
         });
         reg.on('update-end', () => region.onUpdateEnd(self.wavesurfer));
-
-        reg.on('dblclick', () => {
-          window.setTimeout(function() {
-            reg.play();
-          }, 0);
-        });
 
         reg.on('in', ev => {
           region.onClick(self.wavesurfer, ev);
